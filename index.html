@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>DEJAVU Writing Room</title>
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700&family=Special+Elite&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
+<style>
+:root{
+  --desk:#6b4a35;--paper:#f6efdc;--ink:#2b2418;--soft:#7a6c55;--line:#c9d6d8;--margin:#d4645c;
+  --cover:#2f4a3f;--cover-ink:#f3e7c4;--pen:#25408f;--card:#fbf6e8;--edge:#d8cba8;--warn:#a33a2e;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+:root:not([data-theme="light"]){}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){--desk:#1d1712;--paper:#2a241b;--ink:#eadfc4;--soft:#a39679;--line:#3b4446;--margin:#a8534c;--cover:#1c2e26;--cover-ink:#e6d8ae;--pen:#8fa8ee;--card:#322b20;--edge:#4a3f2d;--warn:#e07a6c}
+}
+:root[data-theme="dark"]{--desk:#1d1712;--paper:#2a241b;--ink:#eadfc4;--soft:#a39679;--line:#3b4446;--margin:#a8534c;--cover:#1c2e26;--cover-ink:#e6d8ae;--pen:#8fa8ee;--card:#322b20;--edge:#4a3f2d;--warn:#e07a6c}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--desk);color:var(--ink);font-family:"Nanum Myeongjo","Batang","Noto Serif KR",serif;font-size:16px;min-height:100vh}
+button,input,select,textarea{font:inherit;color:inherit}
+.type{font-family:"Special Elite","Courier New",monospace;letter-spacing:.04em}
+.hand{font-family:"Nanum Pen Script","Gaegu",cursive}
+.wrap{max-width:880px;margin:0 auto;padding:16px 12px 48px}
+/* login cover */
+.cover{max-width:420px;margin:8vh auto 0;background:var(--cover);color:var(--cover-ink);padding:36px 28px;border-radius:4px 14px 14px 4px;border-left:14px solid #0000004d;box-shadow:0 10px 30px #0006;text-align:center}
+.label{background:var(--paper);color:var(--ink);padding:18px 14px;margin:18px 0;border:2px solid var(--ink);outline:3px double var(--edge);outline-offset:-8px}
+.label h1{margin:0;font-size:26px;line-height:1.2}
+.label p{margin:6px 0 0;font-size:13px;color:var(--soft)}
+.cover input{width:100%;padding:10px;margin:6px 0;border:1px solid var(--cover-ink);background:#ffffff14;color:var(--cover-ink);border-radius:2px;text-align:center}
+.cover input::placeholder{color:#f3e7c48c}
+.msg{min-height:20px;font-size:13px;margin:6px 0}
+.btn{background:var(--pen);color:#fff;border:0;padding:8px 16px;border-radius:2px;cursor:pointer}
+:root[data-theme="dark"] .btn,:root:not([data-theme="light"]) .btn{color:#10162e}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--edge)}
+.btn.danger{background:transparent;color:var(--warn);border:1px solid var(--warn)}
+.btn.sm{padding:4px 10px;font-size:13px}
+.cover .btn{background:var(--cover-ink);color:var(--cover);width:100%;margin-top:8px;font-weight:700}
+/* notebook */
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:8px;flex-wrap:wrap;color:var(--cover-ink);margin-bottom:10px}
+.top h1{margin:0;font-size:24px}
+.top small{opacity:.75;font-size:13px}
+.chip{font-size:14px;display:flex;gap:8px;align-items:center}
+.tabs{display:flex;gap:4px;margin-bottom:-1px;position:relative;z-index:1;flex-wrap:wrap}
+.tab{border:1px solid var(--edge);border-bottom:0;background:var(--edge);color:var(--soft);padding:8px 16px;border-radius:8px 8px 0 0;cursor:pointer}
+.tab.on{background:var(--paper);color:var(--ink);font-weight:700}
+.sheet{position:relative;background:var(--paper);border:1px solid var(--edge);border-radius:0 6px 6px 6px;padding:20px 18px 28px 64px;min-height:60vh;box-shadow:0 8px 24px #0005;
+  background-image:repeating-linear-gradient(transparent 0 31px,var(--line) 31px 32px);background-position:0 20px}
+.sheet::before{content:"";position:absolute;left:46px;top:0;bottom:0;width:4px;border-left:1px solid var(--margin);border-right:1px solid var(--margin);opacity:.75}
+.sheet::after{content:"";position:absolute;left:8px;top:14px;bottom:14px;width:14px;background:radial-gradient(circle at 7px 7px,var(--desk) 0 5px,transparent 6px) 0 0/14px 40px repeat-y}
+.sheet h2{margin:0 0 8px;font-size:22px;line-height:32px}
+.sheet h3{margin:0;font-size:17px;line-height:32px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;min-height:32px}
+.row.sp{justify-content:space-between}
+.meta{font-size:13px;color:var(--soft);line-height:32px}
+.item{display:flex;gap:10px;align-items:baseline;padding:0;line-height:32px;cursor:pointer;border:0;background:none;width:100%;text-align:left}
+.item:hover .t{color:var(--pen)}
+.item .no{width:3.2em;color:var(--margin);font-size:13px;flex:none}
+.item .t{flex:1;font-size:17px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tag{font-size:12px;border:1px solid var(--soft);color:var(--soft);padding:0 6px;border-radius:2px;line-height:18px;white-space:nowrap}
+.body{white-space:pre-wrap;line-height:32px;font-size:17px;margin:8px 0 16px;word-break:keep-all;overflow-wrap:anywhere}
+.cm{border-left:3px solid var(--pen);padding:0 0 0 10px;margin:0 0 10px}
+.cm p{margin:0;white-space:pre-wrap;line-height:26px}
+.cm .meta{line-height:22px}
+.card{background:var(--card);border:1px solid var(--edge);padding:8px 12px 10px;margin:0 0 12px;box-shadow:2px 2px 0 var(--edge)}
+.card p{margin:4px 0 0;white-space:pre-wrap;line-height:24px;font-size:15px}
+input.f,select.f,textarea.f{width:100%;background:#ffffff40;border:1px solid var(--edge);padding:6px 8px;border-radius:2px;margin:3px 0 10px}
+:root:not([data-theme="light"]) input.f,:root:not([data-theme="light"]) select.f,:root:not([data-theme="light"]) textarea.f{background:#00000026}
+textarea.f{line-height:28px;min-height:260px;resize:vertical}
+textarea.cmt{min-height:70px;line-height:24px}
+.fl{font-size:13px;color:var(--soft)}
+.empty{color:var(--soft);line-height:32px}
+.hand.big{font-size:22px;color:var(--pen)}
+.diff{background:var(--card);border:1px dashed var(--edge);padding:8px 12px;margin:6px 0 10px;white-space:pre-wrap;line-height:24px;font-size:14px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:8px 16px;border-radius:3px;font-size:14px;z-index:9}
+@media (max-width:560px){.sheet{padding:16px 12px 24px 48px}.sheet::before{left:34px}.sheet::after{left:4px}.body{font-size:16px}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+const CFG={
+  email:"leejiah211@gmail.com",
+  firebase:{
+    apiKey:"AIzaSyBDN1qkkPPRw46swQuOC4OVrgJcSHH4BW4",
+    authDomain:"dejavu2026-2c0be.firebaseapp.com",
+    projectId:"dejavu2026-2c0be",
+    appId:"1:350373446164:web:f2a73b745643397d121d01"
+  }
+};
+</script>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=t=>t?new Date(t).toLocaleString('ko-KR',{year:'numeric',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'';
+const store={g(k,w){try{return(w?sessionStorage:localStorage).getItem(k)}catch(e){return null}},s(k,v,w){try{(w?sessionStorage:localStorage).setItem(k,v)}catch(e){}},d(k,w){try{(w?sessionStorage:localStorage).removeItem(k)}catch(e){}}};
+async function sha(t){try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('dejavu1999:'+t));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}catch(e){let h=0;for(const c of 'dejavu1999:'+t)h=(h*31+c.charCodeAt(0))|0;return'x'+h}}
+const STATUS=['초고','수정 중','완성'];
+const CATS=['인물','장소','사건','용어','기타'];
+const S={db:null,ch:[],cm:[],lo:[],rv:[],me:'',tab:'ms',open:null,edit:null,cat:'전체',showRev:null,draft:'',conf:null,hasPw:null};
+let toastT;
+function toast(m){let e=$('.toast');if(!e){e=document.createElement('div');e.className='toast';document.body.appendChild(e)}e.textContent=m;clearTimeout(toastT);toastT=setTimeout(()=>e.remove(),2800)}
+
+/* ---------- 로그인 ---------- */
+function loginView(note){
+  const setup=S.hasPw===false;
+  $('#root').innerHTML=`<div class="cover"><div class="type" style="font-size:12px;opacity:.8">NOTEBOOK · NO. 1 · 1999</div>
+  <div class="label"><h1 class="type">DEJAVU<br>Writing Room</h1><p>두 작가의 비밀 소설 노트</p></div>
+  ${S.hasPw===null?'<div class="msg">노트를 펼치는 중…</div>':`
+  <input id="pw" type="password" placeholder="${setup?'새 공통 비밀번호 정하기':'공통 비밀번호'}" autocomplete="off">
+  ${setup?'<input id="pw2" type="password" placeholder="비밀번호 한 번 더">':''}
+  <input id="me" placeholder="필명 (예: 진이)" value="${esc(store.g('dj_me'))}" maxlength="12">
+  <div class="msg" id="lmsg">${esc(note||(setup?'처음이시네요. 두 분이 함께 쓸 비밀번호를 정해 주세요.':''))}</div>
+  <button class="btn" id="go">${setup?'비밀번호 만들고 입장':'노트 펼치기'}</button>`}
+  </div>`;
+  const go=$('#go');if(go)go.onclick=login;
+  $('#root').onkeydown=e=>{if(e.key==='Enter'&&$('#go'))login()};
+}
+async function login(){
+  const pw=$('#pw').value,me=$('#me').value.trim(),m=$('#lmsg');
+  if(!pw||!me){m.textContent='비밀번호와 필명을 모두 적어 주세요.';return}
+  m.textContent='문을 여는 중…';store.s('dj_me',me);
+  try{await firebase.auth().signInWithEmailAndPassword(CFG.email,pw);S.me=me;enter()}
+  catch(e){m.textContent=(e.code||'').includes('network')?'연결에 문제가 있어요. 잠시 뒤 다시 시도해 주세요.':'비밀번호가 맞지 않아요.'}
+}
+function enter(){
+  if(S.entered)return;S.entered=true;
+  const sub=(c,k)=>S.db.collection(c).onSnapshot(sn=>{S[k]=sn.docs.map(d=>({id:d.id,...d.data()}));render()},()=>toast('실시간 연결이 잠시 끊겼어요'));
+  sub('chapters','ch');sub('comments','cm');sub('lore','lo');sub('revisions','rv');render(true);
+}
+function logout(){firebase.auth().signOut().finally(()=>location.reload())}
+
+/* ---------- 화면 ---------- */
+const byNo=()=>[...S.ch].sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
+function render(force){
+  if(!S.me)return;
+  if(S.edit&&!force)return;
+  const c=$('#cmt');if(c)S.draft=c.value;
+  const T=(k,l)=>`<button class="tab type ${S.tab===k?'on':''}" data-a="tab" data-v="${k}">${l}</button>`;
+  $('#root').innerHTML=`<div class="wrap">
+  <div class="top"><div><h1 class="type">DEJAVU Writing Room</h1><small class="type">since 1999 · our notebook</small></div>
+  <div class="chip"><span class="hand big" style="color:var(--cover-ink)">✎ ${esc(S.me)}</span><button class="btn ghost sm" style="color:var(--cover-ink)" data-a="out">나가기</button></div></div>
+  <div class="tabs">${T('ms','원고')}${T('lo','설정 자료실')}${T('rv','수정 기록')}</div>
+  <div class="sheet">${S.tab==='ms'?msView():S.tab==='lo'?loView():rvView()}</div></div>`;
+  const n=$('#cmt');if(n)n.value=S.draft;
+}
+function msView(){
+  if(S.edit&&S.edit.type==='ch')return chForm();
+  const list=byNo(),cur=S.open&&list.find(x=>x.id===S.open);
+  if(cur)return chRead(cur,list.indexOf(cur)+1);
+  return `<div class="row sp"><h2>원고 목록</h2><button class="btn" data-a="newCh">＋ 새 원고</button></div>
+  ${list.length?list.map((x,i)=>`<button class="item" data-a="open" data-v="${x.id}"><span class="no type">NO.${i+1}</span><span class="t">${esc(x.title)}</span><span class="tag">${esc(x.status)}</span><span class="meta">${esc(x.author)}</span></button>`).join(''):'<p class="empty">아직 비어 있는 노트예요. 1999년의 첫 장을 옮겨 적어 볼까요?</p>'}`;
+}
+function chRead(x,no){
+  const cms=S.cm.filter(c=>c.chapterId===x.id).sort((a,b)=>a.at-b.at);
+  const del=S.conf==='ch:'+x.id;
+  return `<div class="row sp"><button class="btn ghost sm" data-a="back">← 목록</button><div class="row"><button class="btn ghost sm" data-a="editCh" data-v="${x.id}">수정하기</button><button class="btn danger sm" data-a="delCh" data-v="${x.id}">${del?'정말 삭제할까요?':'삭제'}</button></div></div>
+  <div class="row"><span class="type" style="color:var(--margin)">NO.${no}</span><span class="tag">${esc(x.status)}</span></div>
+  <h2>${esc(x.title)}</h2>
+  <div class="meta">${esc(x.author)} · 처음 쓴 날 ${fmt(x.createdAt)}${x.updatedAt!==x.createdAt?` · 마지막 수정 ${esc(x.lastEditor||'')} ${fmt(x.updatedAt)}`:''}</div>
+  <div class="body">${esc(x.body)}</div>
+  <h3 class="hand big">✎ COMMENT (${cms.length})</h3>
+  ${cms.map(c=>`<div class="cm"><div class="meta">${esc(c.author)} · ${fmt(c.at)}${c.author===S.me?` · <a href="#" data-a="delCm" data-v="${c.id}" style="color:var(--warn)">삭제</a>`:''}</div><p>${esc(c.text)}</p></div>`).join('')||'<p class="empty">첫 코멘트를 남겨 보세요.</p>'}
+  <textarea class="f cmt" id="cmt" placeholder="코멘트나 수정 제안을 적어 주세요"></textarea>
+  <button class="btn" data-a="addCm" data-v="${x.id}">코멘트 남기기</button>`;
+}
+function chForm(){
+  const x=S.edit.id?S.ch.find(c=>c.id===S.edit.id):null,v=S.edit.v||x||{title:'',body:'',status:'초고'};
+  return `<h2>${x?'원고 수정':'새 원고'}</h2>
+  <label class="fl">제목</label><input class="f" id="f-t" value="${esc(v.title)}" maxlength="80">
+  <label class="fl">상태</label><select class="f" id="f-s">${STATUS.map(s=>`<option ${v.status===s?'selected':''}>${s}</option>`).join('')}</select>
+  <label class="fl">본문</label><textarea class="f" id="f-b">${esc(v.body)}</textarea>
+  ${x?'<label class="fl">수정 메모 (수정 기록에 남아요)</label><input class="f" id="f-n" placeholder="예: 2장 대사 다듬음" maxlength="120">':''}
+  <div class="row"><button class="btn" data-a="saveCh">저장</button><button class="btn ghost" data-a="cancel">취소</button></div>`;
+}
+function loView(){
+  if(S.edit&&S.edit.type==='lo'){
+    const x=S.edit.id?S.lo.find(c=>c.id===S.edit.id):null,v=x||{cat:'인물',title:'',body:''};
+    return `<h2>${x?'설정 수정':'새 설정'}</h2>
+    <label class="fl">분류</label><select class="f" id="l-c">${CATS.map(s=>`<option ${v.cat===s?'selected':''}>${s}</option>`).join('')}</select>
+    <label class="fl">이름 / 제목</label><input class="f" id="l-t" value="${esc(v.title)}" maxlength="60">
+    <label class="fl">내용</label><textarea class="f" id="l-b" style="min-height:180px">${esc(v.body)}</textarea>
+    <div class="row"><button class="btn" data-a="saveLo">저장</button><button class="btn ghost" data-a="cancel">취소</button></div>`;
+  }
+  const f=['전체',...CATS],items=S.lo.filter(x=>S.cat==='전체'||x.cat===S.cat).sort((a,b)=>a.cat.localeCompare(b.cat)||a.title.localeCompare(b.title));
+  return `<div class="row sp"><h2>설정 자료실</h2><button class="btn" data-a="newLo">＋ 새 설정</button></div>
+  <div class="row" style="margin-bottom:12px">${f.map(c=>`<button class="btn sm ${S.cat===c?'':'ghost'}" data-a="cat" data-v="${c}">${c}</button>`).join('')}</div>
+  ${items.map(x=>`<div class="card"><div class="row sp"><div class="row"><span class="tag">${esc(x.cat)}</span><b>${esc(x.title)}</b></div><div class="row"><button class="btn ghost sm" data-a="editLo" data-v="${x.id}">수정</button><button class="btn danger sm" data-a="delLo" data-v="${x.id}">${S.conf==='lo:'+x.id?'정말?':'삭제'}</button></div></div><p>${esc(x.body)}</p><div class="meta" style="line-height:22px">${esc(x.author)} · ${fmt(x.at)}</div></div>`).join('')||'<p class="empty">인물·장소·사건·용어 설정을 여기에 모아 두세요.</p>'}`;
+}
+function rvView(){
+  const l=[...S.rv].sort((a,b)=>b.at-a.at);
+  return `<h2>수정 기록</h2>${l.map(r=>{
+    const cur=S.ch.find(c=>c.id===r.chapterId),same=cur&&cur.title===r.title&&cur.body===r.body,open=S.showRev===r.id;
+    return `<div class="card"><div class="row sp"><div><span class="tag">${esc(r.kind)}</span> <b>${esc(r.title)}</b></div><div class="row"><button class="btn ghost sm" data-a="showRev" data-v="${r.id}">${open?'접기':'그때 원고 보기'}</button>${same?'':`<button class="btn sm" data-a="restore" data-v="${r.id}">${S.conf==='rv:'+r.id?'정말 되돌릴까요?':'이 버전으로 되돌리기'}</button>`}</div></div>
+    <div class="meta" style="line-height:22px">${esc(r.author)} · ${fmt(r.at)}${r.note?' · '+esc(r.note):''}</div>${open?`<div class="diff">${esc(r.body)}</div>`:''}</div>`}).join('')||'<p class="empty">원고를 저장하면 이곳에 버전이 차곡차곡 쌓여요.</p>'}`;
+}
+
+/* ---------- 동작 ---------- */
+async function logRev(id,d,kind,note){await S.db.collection('revisions').add({chapterId:id,title:d.title,body:d.body,status:d.status,createdAt:d.createdAt,author:S.me,kind,note:note||'',at:Date.now()})}
+const A={
+  tab(v){S.tab=v;S.open=null;S.edit=null;S.conf=null;render(true)},
+  out:logout,
+  back(){S.open=null;S.conf=null;render(true)},
+  open(v){S.open=v;S.draft='';render(true)},
+  cat(v){S.cat=v;render(true)},
+  cancel(){S.edit=null;render(true)},
+  newCh(){S.edit={type:'ch',id:null};render(true)},
+  editCh(v){S.edit={type:'ch',id:v};render(true)},
+  newLo(){S.edit={type:'lo',id:null};render(true)},
+  editLo(v){S.edit={type:'lo',id:v};render(true)},
+  showRev(v){S.showRev=S.showRev===v?null:v;render(true)},
+  async saveCh(){
+    const title=$('#f-t').value.trim(),body=$('#f-b').value,status=$('#f-s').value,note=$('#f-n')?$('#f-n').value.trim():'',id=S.edit.id,now=Date.now();
+    if(!title){toast('제목을 적어 주세요');return}
+    try{
+      if(id){const old=S.ch.find(c=>c.id===id);
+        if(old.title===title&&old.body===body&&old.status===status){S.edit=null;render(true);return}
+        await S.db.doc('chapters/'+id).update({title,body,status,updatedAt:now,lastEditor:S.me});
+        await logRev(id,{title,body,status,createdAt:old.createdAt},'수정',note);S.open=id;
+      }else{const ref=S.db.collection('chapters').doc();const d={title,body,status,author:S.me,createdAt:now,updatedAt:now,lastEditor:S.me};
+        await ref.set(d);await logRev(ref.id,d,'최초 게재','');S.open=ref.id}
+      S.edit=null;S.conf=null;render(true);toast('저장했어요');
+    }catch(e){toast('저장하지 못했어요. 권한을 확인해 주세요')}
+  },
+  async delCh(v){
+    if(S.conf!=='ch:'+v){S.conf='ch:'+v;render(true);return}
+    try{for(const c of S.cm.filter(c=>c.chapterId===v))await S.db.doc('comments/'+c.id).delete();
+      await S.db.doc('chapters/'+v).delete();S.open=null;S.conf=null;render(true);toast('삭제했어요 (수정 기록에서 되돌릴 수 있어요)')}catch(e){toast('삭제하지 못했어요')}
+  },
+  async addCm(v){
+    const t=($('#cmt').value||'').trim();if(!t)return;
+    try{await S.db.collection('comments').add({chapterId:v,author:S.me,text:t,at:Date.now()});S.draft='';$('#cmt').value=''}catch(e){toast('코멘트를 남기지 못했어요')}
+  },
+  async delCm(v){try{await S.db.doc('comments/'+v).delete()}catch(e){toast('삭제하지 못했어요')}},
+  async saveLo(){
+    const title=$('#l-t').value.trim(),body=$('#l-b').value,cat=$('#l-c').value;if(!title){toast('이름을 적어 주세요');return}
+    try{const d={cat,title,body,author:S.me,at:Date.now()};
+      if(S.edit.id)await S.db.doc('lore/'+S.edit.id).update(d);else await S.db.collection('lore').add(d);
+      S.edit=null;render(true);toast('저장했어요')}catch(e){toast('저장하지 못했어요')}
+  },
+  async delLo(v){
+    if(S.conf!=='lo:'+v){S.conf='lo:'+v;render(true);return}
+    try{await S.db.doc('lore/'+v).delete();S.conf=null}catch(e){toast('삭제하지 못했어요')}
+  },
+  async restore(v){
+    if(S.conf!=='rv:'+v){S.conf='rv:'+v;render(true);return}
+    const r=S.rv.find(x=>x.id===v);if(!r)return;S.conf=null;
+    try{const now=Date.now(),ex=S.ch.find(c=>c.id===r.chapterId);
+      const d={title:r.title,body:r.body,status:r.status||'수정 중',updatedAt:now,lastEditor:S.me};
+      if(ex)await S.db.doc('chapters/'+r.chapterId).update(d);
+      else await S.db.doc('chapters/'+r.chapterId).set({...d,author:S.me,createdAt:r.createdAt||now});
+      await logRev(r.chapterId,{...d,createdAt:r.createdAt},'되돌림',fmt(r.at)+' 버전으로');
+      S.tab='ms';S.open=r.chapterId;render(true);toast('되돌렸어요')}catch(e){toast('되돌리지 못했어요')}
+  }
+};
+document.addEventListener('click',e=>{const t=e.target.closest('[data-a]');if(!t)return;e.preventDefault();const f=A[t.dataset.a];if(f)f(t.dataset.v)});
+
+/* ---------- 시작 ---------- */
+(function(){
+  S.hasPw=true;
+  if(/여기에/.test(CFG.firebase.apiKey)){loginView('아직 Firebase 설정이 비어 있어요. 안내 순서 3번을 먼저 해 주세요.');const g=$('#go');if(g)g.disabled=true;return}
+  firebase.initializeApp(CFG.firebase);S.db=firebase.firestore();loginView();
+  firebase.auth().onAuthStateChanged(u=>{const me=store.g('dj_me');if(u&&me&&!S.me){S.me=me;enter()}});
+})();
+</script>
+</body>
+</html>

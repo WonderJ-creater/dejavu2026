@@ -45,8 +45,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .tabs{display:flex;gap:4px;margin-bottom:-1px;position:relative;z-index:1;flex-wrap:wrap}
 .tab{border:1px solid var(--edge);border-bottom:0;background:var(--edge);color:var(--soft);padding:8px 16px;border-radius:8px 8px 0 0;cursor:pointer}
 .tab.on{background:var(--paper);color:var(--ink);font-weight:700}
-.sheet{position:relative;background:var(--paper);border:1px solid var(--edge);border-radius:0 6px 6px 6px;padding:20px 18px 28px 64px;min-height:60vh;box-shadow:0 8px 24px #0005;
-  background-image:repeating-linear-gradient(transparent 0 31px,var(--line) 31px 32px);background-position:0 20px}
+.sheet{position:relative;background:var(--paper);border:1px solid var(--edge);border-radius:0 6px 6px 6px;padding:20px 18px 28px 64px;min-height:60vh;box-shadow:0 8px 24px #0005}
 .sheet::before{content:"";position:absolute;left:46px;top:0;bottom:0;width:4px;border-left:1px solid var(--margin);border-right:1px solid var(--margin);opacity:.75}
 .sheet::after{content:"";position:absolute;left:8px;top:14px;bottom:14px;width:14px;background:radial-gradient(circle at 7px 7px,var(--desk) 0 5px,transparent 6px) 0 0/14px 40px repeat-y}
 .sheet h2{margin:0 0 8px;font-size:22px;line-height:32px}
@@ -73,7 +72,8 @@ textarea.cmt{min-height:70px;line-height:24px}
 .empty{color:var(--soft);line-height:32px}
 .hand.big{font-size:22px;color:var(--pen)}
 .diff{background:var(--card);border:1px dashed var(--edge);padding:8px 12px;margin:6px 0 10px;white-space:pre-wrap;line-height:24px;font-size:14px}
-.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:8px 16px;border-radius:3px;font-size:14px;z-index:9}
+.toast{position:fixed;left:50%;top:calc(24px + env(safe-area-inset-top,0px));transform:translateX(-50%);background:#2f6b4a;color:#fff;padding:12px 22px;border-radius:999px;font-size:16px;font-weight:700;z-index:99;box-shadow:0 6px 20px #0006;max-width:92vw;text-align:center}
+.toast.err{background:var(--warn);color:#fff;border-radius:12px}
 @media (max-width:560px){.sheet{padding:16px 12px 24px 48px}.sheet::before{left:34px}.sheet::after{left:4px}.body{font-size:16px}}
 </style>
 </head>
@@ -103,7 +103,9 @@ const STATUS=['초고','수정 중','완성'];
 const CATS=['인물','장소','사건','용어','기타'];
 const S={db:null,ch:[],cm:[],lo:[],rv:[],me:'',tab:'ms',open:null,edit:null,cat:'전체',showRev:null,draft:'',conf:null,hasPw:null};
 let toastT;
-function toast(m){let e=$('.toast');if(!e){e=document.createElement('div');e.className='toast';document.body.appendChild(e)}e.textContent=m;clearTimeout(toastT);toastT=setTimeout(()=>e.remove(),2800)}
+function toast(m,err){let e=$('.toast');if(!e){e=document.createElement('div');document.body.appendChild(e)}e.className='toast'+(err?' err':'');e.textContent=m;clearTimeout(toastT);toastT=setTimeout(()=>e.remove(),err?7000:2200)}
+const wt=(p,ms=12000)=>Promise.race([p,new Promise((_,r)=>setTimeout(()=>r({code:'timeout'}),ms))]);
+function errMsg(e){const c=(e&&e.code)||'';if(c.includes('permission'))return'권한이 없어요. Firebase 규칙의 이메일이 로그인 이메일과 같은지 확인해 주세요.';if(c==='timeout')return'서버에 연결되지 않아요. 인터넷이나 광고 차단을 확인해 주세요.';if(c.includes('not-found')||c.includes('precondition'))return'Firestore 데이터베이스가 만들어졌는지 확인해 주세요.';return'저장 실패: '+(c||(e&&e.message)||'알 수 없는 오류')}
 
 /* ---------- 로그인 ---------- */
 function loginView(note){
@@ -129,7 +131,7 @@ async function login(){
 }
 function enter(){
   if(S.entered)return;S.entered=true;
-  const sub=(c,k)=>S.db.collection(c).onSnapshot(sn=>{S[k]=sn.docs.map(d=>({id:d.id,...d.data()}));render()},()=>toast('실시간 연결이 잠시 끊겼어요'));
+  const sub=(c,k)=>S.db.collection(c).onSnapshot(sn=>{S[k]=sn.docs.map(d=>({id:d.id,...d.data()}));render()},e=>toast(errMsg(e),1));
   sub('chapters','ch');sub('comments','cm');sub('lore','lo');sub('revisions','rv');render(true);
 }
 function logout(){firebase.auth().signOut().finally(()=>location.reload())}
@@ -175,7 +177,7 @@ function chForm(){
   <label class="fl">상태</label><select class="f" id="f-s">${STATUS.map(s=>`<option ${v.status===s?'selected':''}>${s}</option>`).join('')}</select>
   <label class="fl">본문</label><textarea class="f" id="f-b">${esc(v.body)}</textarea>
   ${x?'<label class="fl">수정 메모 (수정 기록에 남아요)</label><input class="f" id="f-n" placeholder="예: 2장 대사 다듬음" maxlength="120">':''}
-  <div class="row"><button class="btn" data-a="saveCh">저장</button><button class="btn ghost" data-a="cancel">취소</button></div>`;
+  <div class="row"><button class="btn" id="savebtn" data-a="saveCh">저장</button><button class="btn ghost" data-a="cancel">취소</button></div>`;
 }
 function loView(){
   if(S.edit&&S.edit.type==='lo'){
@@ -214,17 +216,22 @@ const A={
   editLo(v){S.edit={type:'lo',id:v};render(true)},
   showRev(v){S.showRev=S.showRev===v?null:v;render(true)},
   async saveCh(){
-    const title=$('#f-t').value.trim(),body=$('#f-b').value,status=$('#f-s').value,note=$('#f-n')?$('#f-n').value.trim():'',id=S.edit.id,now=Date.now();
-    if(!title){toast('제목을 적어 주세요');return}
+    if(S.saving)return;
+    const title=$('#f-t').value.trim(),body=$('#f-b').value,status=$('#f-s').value,note=$('#f-n')?$('#f-n').value.trim():'',id=S.edit.id,now=Date.now(),btn=$('#savebtn');
+    if(!title){toast('제목을 적어 주세요',1);return}
+    S.saving=true;if(btn){btn.disabled=true;btn.textContent='저장 중…'}
     try{
-      if(id){const old=S.ch.find(c=>c.id===id);
-        if(old.title===title&&old.body===body&&old.status===status){S.edit=null;render(true);return}
-        await S.db.doc('chapters/'+id).update({title,body,status,updatedAt:now,lastEditor:S.me});
-        await logRev(id,{title,body,status,createdAt:old.createdAt},'수정',note);S.open=id;
-      }else{const ref=S.db.collection('chapters').doc();const d={title,body,status,author:S.me,createdAt:now,updatedAt:now,lastEditor:S.me};
-        await ref.set(d);await logRev(ref.id,d,'최초 게재','');S.open=ref.id}
-      S.edit=null;S.conf=null;render(true);toast('저장했어요');
-    }catch(e){toast('저장하지 못했어요. 권한을 확인해 주세요')}
+      let openId=id;
+      await wt((async()=>{
+        if(id){const old=S.ch.find(c=>c.id===id);
+          if(old.title===title&&old.body===body&&old.status===status)return;
+          await S.db.doc('chapters/'+id).update({title,body,status,updatedAt:now,lastEditor:S.me});
+          await logRev(id,{title,body,status,createdAt:old.createdAt||now},'수정',note);
+        }else{const ref=S.db.collection('chapters').doc();const d={title,body,status,author:S.me,createdAt:now,updatedAt:now,lastEditor:S.me};
+          await ref.set(d);openId=ref.id;await logRev(ref.id,d,'최초 게재','')}
+      })());
+      S.saving=false;S.open=openId;S.edit=null;S.conf=null;render(true);toast('저장 완료 ✓');
+    }catch(e){S.saving=false;if(btn){btn.disabled=false;btn.textContent='저장'}toast(errMsg(e),1)}
   },
   async delCh(v){
     if(S.conf!=='ch:'+v){S.conf='ch:'+v;render(true);return}
@@ -233,14 +240,14 @@ const A={
   },
   async addCm(v){
     const t=($('#cmt').value||'').trim();if(!t)return;
-    try{await S.db.collection('comments').add({chapterId:v,author:S.me,text:t,at:Date.now()});S.draft='';$('#cmt').value=''}catch(e){toast('코멘트를 남기지 못했어요')}
+    try{await S.db.collection('comments').add({chapterId:v,author:S.me,text:t,at:Date.now()});S.draft='';$('#cmt').value='';toast('코멘트 저장 완료 ✓')}catch(e){toast(errMsg(e),1)}
   },
   async delCm(v){try{await S.db.doc('comments/'+v).delete()}catch(e){toast('삭제하지 못했어요')}},
   async saveLo(){
     const title=$('#l-t').value.trim(),body=$('#l-b').value,cat=$('#l-c').value;if(!title){toast('이름을 적어 주세요');return}
     try{const d={cat,title,body,author:S.me,at:Date.now()};
-      if(S.edit.id)await S.db.doc('lore/'+S.edit.id).update(d);else await S.db.collection('lore').add(d);
-      S.edit=null;render(true);toast('저장했어요')}catch(e){toast('저장하지 못했어요')}
+      await wt(S.edit.id?S.db.doc('lore/'+S.edit.id).update(d):S.db.collection('lore').add(d));
+      S.edit=null;render(true);toast('저장 완료 ✓')}catch(e){toast(errMsg(e),1)}
   },
   async delLo(v){
     if(S.conf!=='lo:'+v){S.conf='lo:'+v;render(true);return}
